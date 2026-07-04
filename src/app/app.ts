@@ -1,18 +1,28 @@
 import { Component, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
-import { interval, map } from 'rxjs';
+import { interval, map, Observable } from 'rxjs';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+
+type CustomValue = { message: string; value: number };
 
 @Component({
   selector: 'app-root',
   imports: [],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App implements OnInit {
   protected counter = signal(0);
   protected counter$ = toObservable(this.counter);
   private interval = interval(1000);
   protected intervalSignal = toSignal(this.interval, { initialValue: 0 });
+  protected customInterval$ = new Observable<CustomValue>((subscriber) => {
+    let counter = 0;
+    setInterval(() => {
+      console.log('Emitting value ' + counter);
+      subscriber.next({ message: 'new value', value: counter });
+      counter++;
+    }, 2000);
+  });
 
   private destroyRef = inject(DestroyRef);
 
@@ -38,11 +48,13 @@ export class App implements OnInit {
     //   complete: () => console.log('Complete')
     // });
 
-    this.counter$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => {
-        console.log('(observable) Counter value:', value);
-      });
+    this.counter$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
+      console.log('(observable) Counter value:', value);
+    });
+
+    this.customInterval$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
+      console.log('(observable) Custom interval value:', value);
+    });
   }
 
   protected incrementCounter() {

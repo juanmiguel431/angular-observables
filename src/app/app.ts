@@ -1,6 +1,6 @@
 import { Component, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
 import { interval, map } from 'rxjs';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +11,9 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 export class App implements OnInit {
   protected counter = signal(0);
   protected counter$ = toObservable(this.counter);
+  private interval = interval(1000);
+  protected intervalSignal = toSignal(this.interval);
+
   private destroyRef = inject(DestroyRef);
 
   constructor() {

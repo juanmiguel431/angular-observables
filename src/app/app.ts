@@ -12,7 +12,7 @@ export class App implements OnInit {
   protected counter = signal(0);
   protected counter$ = toObservable(this.counter);
   private interval = interval(1000);
-  protected intervalSignal = toSignal(this.interval);
+  protected intervalSignal = toSignal(this.interval, { initialValue: 0 });
 
   private destroyRef = inject(DestroyRef);
 

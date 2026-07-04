@@ -1,5 +1,6 @@
 import { Component, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
 import { interval, map } from 'rxjs';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
@@ -9,12 +10,13 @@ import { interval, map } from 'rxjs';
 })
 export class App implements OnInit {
   protected counter = signal(0);
+  protected counter$ = toObservable(this.counter);
   private destroyRef = inject(DestroyRef);
 
   constructor() {
-    effect(() => {
-      console.log('Counter value:', this.counter());
-    });
+    // effect(() => {
+    //   console.log('(signal) Counter value:', this.counter());
+    // });
   }
 
   ngOnInit(): void {
@@ -32,6 +34,12 @@ export class App implements OnInit {
     //   error: (err) => console.log('Error', err),
     //   complete: () => console.log('Complete')
     // });
+
+    this.counter$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        console.log('(observable) Counter value:', value);
+      });
   }
 
   protected incrementCounter() {

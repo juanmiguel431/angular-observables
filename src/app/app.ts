@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { interval } from 'rxjs';
+import { interval, map } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -11,9 +11,12 @@ export class App implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
-    const subscription = interval(1000).subscribe((value) => {
-      console.log('Hello World ' + value);
-    });
+    // https://rxjs.dev/api
+    const subscription = interval(1000)
+      .pipe(map((value) => value * 2))
+      .subscribe((value) => {
+        console.log('Hello World ' + value);
+      });
 
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
 

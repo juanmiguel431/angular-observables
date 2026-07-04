@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
 import { interval, map } from 'rxjs';
 
 @Component({
@@ -8,14 +8,21 @@ import { interval, map } from 'rxjs';
   styleUrl: './app.css'
 })
 export class App implements OnInit {
+  protected counter = signal(0);
   private destroyRef = inject(DestroyRef);
+
+  constructor() {
+    effect(() => {
+      console.log('Counter value:', this.counter());
+    });
+  }
 
   ngOnInit(): void {
     // https://rxjs.dev/api
     const subscription = interval(1000)
       .pipe(map((value) => value * 2))
       .subscribe((value) => {
-        console.log('Hello World ' + value);
+        // console.log('Hello World ' + value);
       });
 
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
@@ -25,5 +32,9 @@ export class App implements OnInit {
     //   error: (err) => console.log('Error', err),
     //   complete: () => console.log('Complete')
     // });
+  }
+
+  protected incrementCounter() {
+    this.counter.update((value) => value + 1);
   }
 }

@@ -17,9 +17,15 @@ export class App implements OnInit {
   protected intervalSignal = toSignal(this.interval, { initialValue: 0 });
   protected customInterval$ = new Observable<CustomValue>((subscriber) => {
     let counter = 0;
-    setInterval(() => {
+    const intervalRef = setInterval(() => {
       console.log('Emitting value ' + counter);
       subscriber.next({ message: 'new value', value: counter });
+
+      if (counter === 5) {
+        clearInterval(intervalRef);
+        subscriber.complete();
+      }
+
       counter++;
     }, 2000);
   });
@@ -52,8 +58,9 @@ export class App implements OnInit {
       console.log('(observable) Counter value:', value);
     });
 
-    this.customInterval$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      console.log('(observable) Custom interval value:', value);
+    this.customInterval$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (value) => console.log('(observable) Custom interval value:', value),
+      complete: () => console.log('(observable) Custom interval COMPLETED!'),
     });
   }
 
